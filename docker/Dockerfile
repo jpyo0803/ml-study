@@ -38,6 +38,9 @@ RUN git clone https://github.com/zsh-users/zsh-autosuggestions.git ~/.oh-my-zsh/
 RUN sed -i 's/ZSH_THEME=".*"/ZSH_THEME="robbyrussell"/' ~/.zshrc && \
     sed -i 's/plugins=(git)/plugins=(git zsh-autosuggestions zsh-syntax-highlighting)/' ~/.zshrc
 
+# ml-study 리포지토리 클론
+RUN git clone https://github.com/jpyo0803/ml-study.git ~/ml-study
+
 # 기본 셸을 zsh로 설정
 RUN sudo chsh -s $(which zsh) user
 

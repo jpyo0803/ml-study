@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  ml-dev:
+    build: .
+    container_name: ml-study
+    working_dir: /home/user
+    tty: true # 터미널 세션 유지
+    stdin_open: true # 인터랙티브 모드 활성화
+    command: zsh # 기본 셸을 zsh로 설정
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+
+# docker-compose 실행: $ docker-compose up -d 
+# 컨테이너에 접속: docker exec -it ml-study zsh
