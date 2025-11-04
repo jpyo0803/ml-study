@@ -3,3 +3,8 @@
 **/venv
 **/*.mat
 **/*.npz
+**/*.pt
+**/.DS_Store
+
+**/*-ubyte
+**/*.gz
