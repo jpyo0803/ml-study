@@ -1,39 +1,39 @@
 import torch
 from torch.utils.data import DataLoader
 from datasets import load_dataset
-from model import PINN
+from model import PINN_NLS
 from config import Config
 from utils import set_seed, ensure_dirs
-import numpy as np
 
 
-def main():
+def train():
     cfg = Config() # 하이퍼파라미터 및 학습 세팅
     ensure_dirs() # outputs 폴더가 존재하도록 보장
     set_seed(cfg.seed)
 
-    x0, u0, v0, tb, X_f, lb, ub = load_dataset(cfg.data_path, N_0=50, N_b=50, N_f=20000, lb=(-5.0, 0.0), ub=(5.0, np.pi/2))
+    x0, u0, v0, tb, X_f = load_dataset(cfg.data_path, N_0=50, N_b=50, N_f=20000, lb=cfg.lb, ub=cfg.ub)
 
-    x0 = torch.tensor(x0, dtype=torch.float32, device=cfg.device)
-    u0 = torch.tensor(u0, dtype=torch.float32, device=cfg.device)
-    v0 = torch.tensor(v0, dtype=torch.float32, device=cfg.device)
-    tb = torch.tensor(tb, dtype=torch.float32, device=cfg.device)
-    x_f = torch.tensor(X_f[:, 0:1], dtype=torch.float32, device=cfg.device)
-    t_f = torch.tensor(X_f[:, 1:2], dtype=torch.float32, device=cfg.device)
+    x0 = x0.to(cfg.device)
+    u0 = u0.to(cfg.device)
+    v0 = v0.to(cfg.device)
+    tb = tb.to(cfg.device)
+    
+    x_f = X_f[:, 0:1].to(cfg.device)
+    t_f = X_f[:, 1:2].to(cfg.device)
 
-    model = PINN(cfg.layers, cfg.lb, cfg.ub, cfg.device)
+    model = PINN_NLS(cfg.layers, cfg.lb, cfg.ub, cfg.device)
     model = model.to(cfg.device)
 
     # ADAM
     optimizer = torch.optim.Adam(model.parameters(), lr=cfg.lr)
 
-    for it in range(2000):
+    for iter in range(cfg.num_adam_iter):
         optimizer.zero_grad()
         loss = model.loss(x0, u0, v0, tb, x_f, t_f)
         loss.backward()
         optimizer.step()
-        if it % 100 == 0:
-            print(f"Adam iter {it:05d}, loss={loss.item():.3e}")
+        if iter % 100 == 0:
+            print(f"Adam iter {iter:05d}, loss={loss.item():.3e}")
 
     # L-BFGS
     optimizer_lbfgs = torch.optim.LBFGS(
@@ -55,11 +55,14 @@ def main():
     print("Starting L-BFGS optimization...")
     optimizer_lbfgs.step(closure)
     
-    torch.save(model.state_dict(), 'outputs/checkpoints/pinn.pth')
+    '''
+        학습 완료 후 모델 가중치 저장
+    '''
+    torch.save(model.state_dict(), 'outputs/checkpoints/pinn_nls.pth')
     print("Training complete")
 
 if __name__ == "__main__":
-    main()
+    train()
 
 
 
