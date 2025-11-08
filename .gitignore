@@ -6,5 +6,8 @@
 **/*.pt
 **/.DS_Store
 
-**/*-ubyte
-**/*.gz
+**/data/raw/*
+!**/data/raw/.gitkeep
+
+**/data/processed/*
+!**/data/processed/.gitkeep
