@@ -1,0 +1,1 @@
+![baseline_vs_batchnorm_mnist_result](baseline_vs_batchnorm_mnist_result.png)
