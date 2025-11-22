@@ -1,0 +1,43 @@
+import torch.nn as nn
+
+class ConvBlock(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+
+        self.net = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True),
+        )
+
+    def forward(self, X):
+        return self.net(X)
+
+class FCBlock(nn.Module):
+    def __init__(self, in_features, out_features, dropout=0.5):
+        super().__init__()
+
+        self.net = nn.Sequential(
+            nn.Linear(in_features, out_features),
+            nn.Dropout(dropout),
+        )
+
+    def forward(self, X):
+        return self.net(X)
+
+class MNISTClassifier(nn.Module):
+    def __init__(self, num_classes=10):
+        super().__init__()
+
+        self.net = nn.Sequential(
+            ConvBlock(1, 32),
+            nn.MaxPool2d(2),
+            ConvBlock(32, 64),
+            nn.MaxPool2d(2),
+            nn.Flatten(),
+            FCBlock(64*7*7, 128),
+            nn.Linear(128, num_classes),
+        )
+
+    def forward(self, X):
+        return self.net(X)
